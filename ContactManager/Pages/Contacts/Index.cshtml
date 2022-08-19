@@ -1,0 +1,137 @@
+﻿@page
+@model IndexModel
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-page="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Contact[0].Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Contact[0].Address)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Contact[0].City)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Contact[0].State)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Contact[0].Zip)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Contact[0].Email)
+            </th>
+             <th>
+                @Html.DisplayNameFor(model => model.Contact[0].Status)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+
+@foreach (var item in Model.Contact) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Address)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.City)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.State)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Zip)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Email)
+            </td>
+                           <td>
+                    @Html.DisplayFor(modelItem => item.Status)
+                </td>
+                <td>
+                    @if ((await AuthorizationService.AuthorizeAsync(
+                     User, item,
+                     ContactOperations.Update)).Succeeded)
+                    {
+                        <a asp-page="./Edit" asp-route-id="@item.ContactId">Edit</a>
+                        <text> | </text>
+                    }
+
+                    <a asp-page="./Details" asp-route-id="@item.ContactId">Details</a>
+
+                    @if ((await AuthorizationService.AuthorizeAsync(
+                     User, item,
+                     ContactOperations.Delete)).Succeeded)
+                    {
+                        <text> | </text>
+                        <a asp-page="./Delete" asp-route-id="@item.ContactId">Delete</a>
+                    }
+                </td>
+            </tr>
+                    @*Preceding markup omitted for brevity.*@
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Contact.Email)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Contact.Email)
+        </dd>
+    <dt>
+            @Html.DisplayNameFor(model => model.Contact.Status)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Contact.Status)
+        </dd>
+
+@if (Model.Contact.Status != ContactStatus.Approved)
+{
+    @if ((await AuthorizationService.AuthorizeAsync(
+     User, Model.Contact, ContactOperations.Approve)).Succeeded)
+    {
+        <form style="display:inline;" method="post">
+            <input type="hidden" name="id" value="@Model.Contact.ContactId" />
+            <input type="hidden" name="status" value="@ContactStatus.Approved" />
+            <button type="submit" class="btn btn-xs btn-success">Approve</button>
+        </form>
+    }
+}
+
+@if (Model.Contact.Status != ContactStatus.Rejected)
+{
+    @if ((await AuthorizationService.AuthorizeAsync(
+     User, Model.Contact, ContactOperations.Reject)).Succeeded)
+    {
+        <form style="display:inline;" method="post">
+            <input type="hidden" name="id" value="@item Model.Contact.ContactId" />
+            <input type="hidden" name="status" value="@ContactStatus.Rejected" />
+            <button type="submit" class="btn btn-xs btn-danger">Reject</button>
+        </form>
+    }
+}
+
+<div>
+    @if ((await AuthorizationService.AuthorizeAsync(
+         User, Model.Contact,
+         ContactOperations.Update)).Succeeded)
+    {
+        <a asp-page="./Edit" asp-route-id="@item Model.Contact.ContactId">Edit</a>
+        <text> | </text>
+    }
+    <a asp-page="./Index">Back to List</a>
+</div>
+        }
+    </tbody>
+</table>
